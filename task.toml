@@ -1,0 +1,27 @@
+schema_version = "1.3"
+
+[task]
+name = "local/yel-012-robust-channel-regression"
+description = "Recover unlabeled channel transforms and a robust shared linear model with outliers."
+authors = [{ name = "batch-c" }]
+keywords = ["statistical-analysis", "robust-regression", "assignment", "pytest"]
+
+[agent]
+timeout_sec = 3600
+
+[environment]
+build_timeout_sec = 900
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+
+[verifier]
+timeout_sec = 240
+
+[metadata]
+difficulty = "hard"
+category = "statistical-analysis"
+tags = ["python", "theil-sen", "hungarian", "robust-regression", "ledger"]
+expert_time_estimate = "1h"
