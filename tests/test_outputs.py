@@ -5,9 +5,12 @@ from __future__ import annotations
 import json
 import math
 import os
+import statistics
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 
 CANDIDATE = os.environ.get("REGRESSION_ENTRY", "/app/regression_recover.py")
@@ -118,6 +121,32 @@ def test_outlier_consensus_keeps_known_corruption_out(tmp_path):
     report = report_of(execute(tmp_path, base_payload("outliers"), "case_04"))
     assert report["quality"]["outlier_count"] == 20
     assert report["quality"]["inlier_count"] == 120
+
+
+def test_outlier_count_follows_published_mad_formula(tmp_path):
+    """题面锁定中心化残差、1.4826 MAD 和 3.5 倍阈值。"""
+    payload = base_payload("outlier-formula")
+    report = report_of(execute(tmp_path, payload, "case_formula"))
+    mapping = {
+        item["channel_id"]: item["transform"]
+        for item in report["batch_assignments"]
+    }
+    catalog = {item["label"]: item for item in payload["transform_catalog"]}
+    residuals = []
+    for batch in payload["batches"]:
+        transform = catalog[mapping[batch["channel_id"]]]
+        for point in batch["points"]:
+            z = transform["scale"] * point["x"] + transform["shift"]
+            residuals.append(
+                point["y"] - report["model"]["intercept"] - report["model"]["slope"] * z
+            )
+    center = statistics.median(residuals)
+    raw_mad = statistics.median(abs(value - center) for value in residuals)
+    scale = max(1e-6, 1.4826 * raw_mad)
+    inliers = sum(abs(value - center) <= 3.5 * scale for value in residuals)
+    assert report["quality"]["residual_mad"] == pytest.approx(round(scale, 12), abs=1e-9)
+    assert report["quality"]["inlier_count"] == inliers
+    assert report["quality"]["outlier_count"] == len(residuals) - inliers
 
 
 def test_assignment_cost_is_finite_and_bounded(tmp_path):

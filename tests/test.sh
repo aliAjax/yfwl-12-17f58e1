@@ -8,7 +8,7 @@ STATUS_FILE="$LOG_DIR/verification-status.txt"
 TEST_LOG="$LOG_DIR/test-stdout.txt"
 TRUSTED_PYTHON=/usr/local/bin/python3
 TRUSTED_TIMEOUT=/usr/bin/timeout
-VERIFIER_PYTHONPATH=/usr/lib/python3/dist-packages
+SITE_PACKAGES=/usr/lib/python3/dist-packages
 INNER_TIMEOUT_SEC=150
 TEST_RUNNER_UID=10002
 TEST_RUNNER_GID=10002
@@ -82,7 +82,7 @@ env -i \
   PYTHONNOUSERSITE=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
-  PYTHONPATH="$VERIFIER_PYTHONPATH" \
+  PYTHONPATH="$SITE_PACKAGES:/tests" \
   /usr/bin/setsid \
   "$TRUSTED_TIMEOUT" --signal=TERM --kill-after=10s "${INNER_TIMEOUT_SEC}s" \
   "$TRUSTED_PYTHON" -S -s -P -B -u -m pytest -p no:cacheprovider -rA \
@@ -116,7 +116,7 @@ else
     LC_ALL=C.UTF-8 \
     PYTHONNOUSERSITE=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH="$VERIFIER_PYTHONPATH" \
+    PYTHONPATH="$SITE_PACKAGES:/tests" \
     "$TRUSTED_PYTHON" -S -s -P -B -u - \
     "$REPORT" "$PROVENANCE" "$RC" "$VERIFIER_UID" "$TEST_RUNNER_UID" \
     /tests/test_outputs.py /tests/scoring.json <<'PY'
@@ -176,7 +176,7 @@ PY
       LC_ALL=C.UTF-8 \
       PYTHONNOUSERSITE=1 \
       PYTHONDONTWRITEBYTECODE=1 \
-      PYTHONPATH="$VERIFIER_PYTHONPATH" \
+      PYTHONPATH="$SITE_PACKAGES:/tests" \
       "$TRUSTED_PYTHON" -S -s -P -B /tests/score.py \
       --config /tests/scoring.json \
       --junit "$REPORT" \

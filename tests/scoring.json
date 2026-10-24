@@ -6,7 +6,8 @@
     "core_min_share": 0.5
   },
   "gate_tests": [
-    "test_outputs.py::test_channel_transform_correspondence_is_recovered"
+    "test_outputs.py::test_channel_transform_correspondence_is_recovered",
+    "test_outputs.py::test_outlier_count_follows_published_mad_formula"
   ],
   "tests": {
     "test_outputs.py::test_robust_intercept_is_recovered": {
